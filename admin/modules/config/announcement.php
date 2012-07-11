@@ -60,6 +60,8 @@ if($mybb->input['action'] == "do_add") {
 		"Announcement" => $db->escape_string($mybb->input['announcement']),
 		"Sort" => "0",
 		"Global" => $mybb->input['global'],
+		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
+		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
 		"Color" => $db->escape_string($mybb->input['color']),
 		"BackColor" => $db->escape_string($mybb->input['back_color']),
 		"Border" => $db->escape_string(@serialize($mybb->input['border_select'])),
@@ -86,8 +88,15 @@ if($mybb->input['action'] == "do_add") {
 	$add_announcement = $form->generate_text_area("announcement");
 	$form_container->output_row($lang->announcement_simple." <em>*</em>", $lang->announcement_desc, $add_announcement);
 
-	$add_global = $form->generate_yes_no_radio("global");
+	$id = "global";
+	$add_global = $form->generate_yes_no_radio("global", 1, true, array("id" => $id."_yes", "class" => $id), array("id" => $id."_no", "class" => $id));
 	$form_container->output_row($lang->announcement_global." <em>*</em>", '', $add_global);
+
+	$add_forum = $form->generate_forum_select("forum[]", array(), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_forum, $lang->announcement_forum_desc, $add_forum, '', array(), array('id' => 'forum'));
+
+	$add_group = $form->generate_group_select("group[]", array(), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
 
 	$add_color = $form->generate_text_box("color", "#FFFFFF");
 	$form_container->output_row($lang->announcement_color." <em>*</em>", $lang->announcement_color_desc, $add_color);
@@ -139,6 +148,7 @@ if($mybb->input['action'] == "do_add") {
 		});
 		function loadPeekers()
 		{
+			new Peeker($$(".global"), $("forum"), /0/, true);
 			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
 			new Peeker($("border"), $("border_color"), /[^0]/, false);
 		}
@@ -240,6 +250,8 @@ if($mybb->input['action'] == "do_add") {
 	$update = array(
 		"Announcement" => $db->escape_string($mybb->input['announcement']),
 		"Global" => $mybb->input['global'],
+		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
+		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
 		"Color" => $db->escape_string($mybb->input['color']),
 		"BackColor" => $db->escape_string($mybb->input['back_color']),
 		"Border" => $db->escape_string(@serialize($mybb->input['border_select'])),
@@ -261,7 +273,7 @@ if($mybb->input['action'] == "do_add") {
 		admin_redirect("index.php?module=config-announcement");
 	}
 	$aid=intval($mybb->input['aid']);
-	$query = $db->simple_select("announcement", "Announcement, Global, Color, BackColor, Border, BorderColor, Scroll, Css, Enabled", "ID='{$aid}'");
+	$query = $db->simple_select("announcement", "Announcement, Global, Forum, Groups, Color, BackColor, Border, BorderColor, Scroll, Css, Enabled", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
 		flash_message($lang->announcement_error, 'error');
@@ -279,8 +291,15 @@ if($mybb->input['action'] == "do_add") {
 	$add_announcement = $form->generate_text_area("announcement", $announcement['Announcement']);
 	$form_container->output_row($lang->announcement_simple." <em>*</em>", $lang->announcement_desc, $add_announcement);
 
-	$add_global = $form->generate_yes_no_radio("global", $announcement['Global']);
+	$id = "global";
+	$add_global = $form->generate_yes_no_radio("global", $announcement['Global'], true, array("id" => $id."_yes", "class" => $id), array("id" => $id."_no", "class" => $id));
 	$form_container->output_row($lang->announcement_global." <em>*</em>", '', $add_global);
+
+	$add_forum = $form->generate_forum_select("forum[]", @unserialize($announcement['Forum']), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_forum, $lang->announcement_forum_desc, $add_forum, '', array(), array('id' => 'forum'));
+
+	$add_group = $form->generate_group_select("group[]", @unserialize($announcement['Groups']), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
 
 	$add_color = $form->generate_text_box("color", $announcement['Color']);
 	$form_container->output_row($lang->announcement_color." <em>*</em>", $lang->announcement_color_desc, $add_color);
@@ -331,6 +350,7 @@ if($mybb->input['action'] == "do_add") {
 		});
 		function loadPeekers()
 		{
+			new Peeker($$(".global"), $("forum"), /0/, true);
 			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
 			new Peeker($("border"), $("border_color"), /[^0]/, false);
 		}
