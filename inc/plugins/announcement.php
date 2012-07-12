@@ -28,7 +28,7 @@ function announcement_info()
 function announcement_install()
 {
 	global $db;
-	$db->query("CREATE TABLE `".TABLE_PREFIX."announcement` ( `ID` int(11) NOT NULL AUTO_INCREMENT, `Sort` int(11) NOT NULL,`Announcement` text NOT NULL, `Global` tinyint(1) NOT NULL, `Forum` text NOT NULL, `Groups` text NOT NULL, `Color` varchar(20) NOT NULL, `BackColor` varchar(20) NOT NULL, `Border` text NOT NULL, `BorderColor` varchar(20) NOT NULL, `Scroll` varchar(50) NOT NULL, `slow_down` tinyint(1) NOT NULL, `Css` text NOT NULL, `Enabled` tinyint(1) NOT NULL, PRIMARY KEY (`ID`) ) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1");
+	$db->query("CREATE TABLE `".TABLE_PREFIX."announcement` ( `ID` int(11) NOT NULL AUTO_INCREMENT, `Sort` int(11) NOT NULL,`Announcement` text NOT NULL, `Global` tinyint(1) NOT NULL, `Forum` text NOT NULL, `Groups` text NOT NULL, `Langs` text NOT NULL, `Color` varchar(20) NOT NULL, `BackColor` varchar(20) NOT NULL, `Border` text NOT NULL, `BorderColor` varchar(20) NOT NULL, `Scroll` varchar(50) NOT NULL, `slow_down` tinyint(1) NOT NULL, `Css` text NOT NULL, `Enabled` tinyint(1) NOT NULL, PRIMARY KEY (`ID`) ) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1");
 }
 
 function announcement_is_installed()
@@ -114,14 +114,22 @@ function announcement_create($global, $forum=-1)
 {
 	global $db, $mybb;
 	$return="";
-	$query=$db->simple_select("announcement", "Announcement, Forum, Groups, Color, BackColor, Border, BorderColor, Scroll, slow_down, Css", "Global='$global' AND Enabled='1'", array("order_by"=>"Sort"));
+	$query=$db->simple_select("announcement", "Announcement, Forum, Groups, Langs, Color, BackColor, Border, BorderColor, Scroll, slow_down, Css", "Global='$global' AND Enabled='1'", array("order_by"=>"Sort"));
 	while($announcements=$db->fetch_array($query)) {
-		echo $announcements['Announcement']."(".$global.")<br />";
-        if(!announcement_member(@unserialize($announcements['Groups']))||(!announcement_forum(@unserialize($announcements['Forum']), $forum)&&!$global))
+		//Prüfen ob Mitglied einer Gruppe zum Zeigen
+    	if(!announcement_member(@unserialize($announcements['Groups'])))
 			continue;
+
+		//Prüfen ob in einem Forum zum Zeigen (Globale werden immer übersprungen)
+		if(!announcement_forum(@unserialize($announcements['Forum']), $forum)&&!$global)
+		    continue;
+
+		//Prüfen ob Ankündigung in Sprache
+		if(!announcement_language(@unserialize($announcements['Langs'])))
+		    continue;
+		
 		$text = $announcements['Announcement'];
 		
-		echo "Weiter<br /><br />";
 		$scrollamount = "scrollamount=\"4\"";
 		$scroll_additional = "";
     	if($announcements['slow_down']) {
@@ -160,6 +168,18 @@ function announcement_forum($forums, $forum) {
     if(!@in_Array($forum, $forums))
 	    return false;
 	return true;
+}
+
+function announcement_language($languages) {
+	global $lang;
+	if(!is_array($languages))
+	    return true;
+	
+	$language = $lang->language;
+	
+	if(in_Array($language, $languages))
+	    return true;
+	return false;
 }
 
 function announcement_member($groups) {

@@ -62,6 +62,7 @@ if($mybb->input['action'] == "do_add") {
 		"Global" => $mybb->input['global'],
 		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
 		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
+		"Langs" => $db->escape_string(@serialize($mybb->input['langs'])),
 		"Color" => $db->escape_string($mybb->input['color']),
 		"BackColor" => $db->escape_string($mybb->input['back_color']),
 		"Border" => $db->escape_string(@serialize($mybb->input['border_select'])),
@@ -97,6 +98,10 @@ if($mybb->input['action'] == "do_add") {
 
 	$add_group = $form->generate_group_select("group[]", array(), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
+
+	$languages = $lang->get_languages();
+	$add_languages = $form->generate_select_box("langs[]", $languages, array(), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_languages, $lang->announcement_languages_desc, $add_languages);
 
 	$add_color = $form->generate_text_box("color", "#FFFFFF");
 	$form_container->output_row($lang->announcement_color." <em>*</em>", $lang->announcement_color_desc, $add_color);
@@ -252,6 +257,7 @@ if($mybb->input['action'] == "do_add") {
 		"Global" => $mybb->input['global'],
 		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
 		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
+		"Langs" => $db->escape_string(@serialize($mybb->input['langs'])),
 		"Color" => $db->escape_string($mybb->input['color']),
 		"BackColor" => $db->escape_string($mybb->input['back_color']),
 		"Border" => $db->escape_string(@serialize($mybb->input['border_select'])),
@@ -273,7 +279,7 @@ if($mybb->input['action'] == "do_add") {
 		admin_redirect("index.php?module=config-announcement");
 	}
 	$aid=intval($mybb->input['aid']);
-	$query = $db->simple_select("announcement", "Announcement, Global, Forum, Groups, Color, BackColor, Border, BorderColor, Scroll, Css, Enabled", "ID='{$aid}'");
+	$query = $db->simple_select("announcement", "Announcement, Global, Forum, Groups, Langs, Color, BackColor, Border, BorderColor, Scroll, Css, Enabled", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
 		flash_message($lang->announcement_error, 'error');
@@ -300,6 +306,10 @@ if($mybb->input['action'] == "do_add") {
 
 	$add_group = $form->generate_group_select("group[]", @unserialize($announcement['Groups']), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
+
+	$languages = $lang->get_languages();
+	$add_languages = $form->generate_select_box("langs[]", $languages, @unserialize($announcement['Langs']), array("multiple"=>true));
+	$form_container->output_row($lang->announcement_languages, $lang->announcement_languages_desc, $add_languages);
 
 	$add_color = $form->generate_text_box("color", $announcement['Color']);
 	$form_container->output_row($lang->announcement_color." <em>*</em>", $lang->announcement_color_desc, $add_color);
