@@ -62,6 +62,9 @@ $l['announcement_slow_down_desc'] = "Soll die Ankündigung verlangsamt werden we
 $l['announcement_slow_down_not'] = "Interner Fehler [4]";
 $l['announcement_css'] = "Weitere CSS Eigenschaften";
 $l['announcement_css_desc'] = "Hier kannst du weitere CSS Eigenschaften angeben";
+$l['announcement_removable'] = "Ausblendbar?";
+$l['announcement_removable_desc'] = "Sollen die User diese Ank&uuml;ndigung ausblenden k&ouml;nnen (wie z.B. bei PN Hinweisen)?";
+$l['announcement_removable_not'] = "Interner Fehler [5]";
 $l['announcement_enable'] = "Ankündigung aktivieren?";
-$l['announcement_enable_not'] = "Interner Fehler [5]";
+$l['announcement_enable_not'] = "Interner Fehler [6]";
 ?>

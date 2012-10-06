@@ -5,55 +5,65 @@ if(!defined("IN_MYBB"))
 	exit;
 }
 
-$page->add_breadcrumb_item($lang->announcement, "index.php?module=config-announcement");
+if(function_exists("myplugins_info"))
+    define(MODULE, "myplugins-announcement");
+else
+    define(MODULE, "config-announcement");
+
+$page->add_breadcrumb_item($lang->announcement, "index.php?module=".MODULE);
 
 /* Insert new announcement */
 if($mybb->input['action'] == "do_add") {
 	if(!verify_post_check($mybb->input['my_post_key']))
 	{
 		flash_message($lang->invalid_post_verify_key2, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 
     if(!strlen(trim($mybb->input['announcement'])))
 	{
 		flash_message($lang->announcement_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['global'])))
 	{
 		flash_message($lang->announcement_global_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['color'])))
 	{
 		flash_message($lang->announcement_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['back_color'])))
 	{
 		flash_message($lang->announcement_back_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['border_color'])))
 	{
 		flash_message($lang->announcement_border_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['scroll'])))
 	{
 		flash_message($lang->announcement_scroll_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['slow_down'])))
 	{
 		flash_message($lang->announcement_slow_down_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
+	}
+	if(!strlen(trim($mybb->input['removable'])))
+	{
+		flash_message($lang->announcement_removable_not, 'error');
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['enable'])))
 	{
 		flash_message($lang->announcement_enable_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	
 	$insert = array(
@@ -70,12 +80,13 @@ if($mybb->input['action'] == "do_add") {
 		"Scroll" => $mybb->input['scroll'],
 		"slow_down" => $mybb->input['slow_down'],
 		"Css" => $db->escape_string($mybb->input['css']),
+		"removable" => $mybb->input['removable'],
 		"Enabled" => $mybb->input['enable']
 	);
 	$db->insert_query("announcement", $insert);
 
 	flash_message($lang->announcement_add_success, 'success');
-	admin_redirect("index.php?module=config-announcement&action=list");
+	admin_redirect("index.php?module=".MODULE."&action=list");
 
 /* Show mask to add a new announcement */
 } elseif($mybb->input['action'] == "add") {
@@ -83,7 +94,7 @@ if($mybb->input['action'] == "do_add") {
 	$page->output_header($lang->announcement_add);
 	generate_tabs("add");
 	
-	$form = new Form("index.php?module=config-announcement&amp;action=do_add", "post");
+	$form = new Form("index.php?module=".MODULE."&amp;action=do_add", "post");
 	$form_container = new FormContainer($lang->announcement_add);
 
 	$add_announcement = $form->generate_text_area("announcement");
@@ -136,6 +147,9 @@ if($mybb->input['action'] == "do_add") {
 	$add_css = $form->generate_text_area("css", "margin-bottom: 10px;\ntext-align: center;\npadding: 8px;");
 	$form_container->output_row($lang->announcement_css, $lang->announcement_css_desc, $add_css);
 
+	$add_removable = $form->generate_yes_no_radio("removable", 0);
+	$form_container->output_row($lang->announcement_removable." <em>*</em>", $lang->announcement_removable_desc, $add_removable);
+
 	$add_enable = $form->generate_yes_no_radio("enable");
 	$form_container->output_row($lang->announcement_enable." <em>*</em>", '', $add_enable);
 
@@ -164,26 +178,26 @@ if($mybb->input['action'] == "do_add") {
 	if(!strlen(trim($mybb->input['aid'])))
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$aid=intval($mybb->input['aid']);
 	$db->delete_query("announcement", "ID='{$aid}'");
 	flash_message($lang->announcement_delete_success, 'success');
-	admin_redirect("index.php?module=config-announcement");
+	admin_redirect("index.php?module=".MODULE);
 
 /* Enable an announcement */
 } elseif($mybb->input['action']=="enable") {
 	if(!strlen(trim($mybb->input['aid'])))
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$aid=intval($mybb->input['aid']);
 	$query = $db->simple_select("announcement", "Enabled", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$announcement = $db->fetch_array($query);
 	if($announcement['Enabled']) {
@@ -195,61 +209,66 @@ if($mybb->input['action'] == "do_add") {
 	}
 	$db->update_query("announcement", array("Enabled"=>$enabled), "ID='{$aid}'");
 	flash_message($lang->announcement_enable_success, 'success');
-	admin_redirect("index.php?module=config-announcement");
+	admin_redirect("index.php?module=".MODULE);
 
 /* Save changes on an announcement */
 } elseif($mybb->input['action']=="do_edit") {
 	if(!strlen(trim($mybb->input['aid'])))
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$aid=intval($mybb->input['aid']);
 	if(!verify_post_check($mybb->input['my_post_key']))
 	{
 		flash_message($lang->invalid_post_verify_key2, 'error');
-		admin_redirect("index.php?module=config-announcement&action=edit&aid=$aid");
+		admin_redirect("index.php?module=".MODULE."&action=edit&aid=$aid");
 	}
 
     if(!strlen(trim($mybb->input['announcement'])))
 	{
 		flash_message($lang->announcement_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['global'])))
 	{
 		flash_message($lang->announcement_global_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['color'])))
 	{
 		flash_message($lang->announcement_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['back_color'])))
 	{
 		flash_message($lang->announcement_back_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['border_color'])))
 	{
 		flash_message($lang->announcement_border_color_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['scroll'])))
 	{
 		flash_message($lang->announcement_scroll_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	if(!strlen(trim($mybb->input['slow_down'])))
 	{
 		flash_message($lang->announcement_slow_down_not, 'error');
-		admin_redirect("index.php?module=config-announcement&action=add");
+		admin_redirect("index.php?module=".MODULE."&action=add");
+	}
+	if(!strlen(trim($mybb->input['removable'])))
+	{
+		flash_message($lang->announcement_removable_not, 'error');
+		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 	if(!strlen(trim($mybb->input['enable'])))
 	{
 		flash_message($lang->announcement_enable_not, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 
 	$update = array(
@@ -265,25 +284,26 @@ if($mybb->input['action'] == "do_add") {
 		"Scroll" => $mybb->input['scroll'],
 		"slow_down" => $mybb->input['slow_down'],
 		"Css" => $db->escape_string($mybb->input['css']),
+		"removable" => $mybb->input['removable'],
 		"Enabled" => $mybb->input['enable']
 	);
 	$db->update_query("announcement", $update, "ID='{$aid}'");
 	flash_message($lang->announcement_edit_success, 'success');
-	admin_redirect("index.php?module=config-announcement");
+	admin_redirect("index.php?module=".MODULE);
 
 /* Show mask for edit an announcement */
 } elseif($mybb->input['action']=="edit") {
 	if(!strlen(trim($mybb->input['aid'])))
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$aid=intval($mybb->input['aid']);
-	$query = $db->simple_select("announcement", "Announcement, Global, Forum, Groups, Langs, Color, BackColor, Border, BorderColor, Scroll, Css, Enabled", "ID='{$aid}'");
+	$query = $db->simple_select("announcement", "*", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
 		flash_message($lang->announcement_error, 'error');
-		admin_redirect("index.php?module=config-announcement");
+		admin_redirect("index.php?module=".MODULE);
 	}
 	$announcement = $db->fetch_array($query);
 
@@ -291,7 +311,7 @@ if($mybb->input['action'] == "do_add") {
 	$page->output_header($lang->announcement);
 	generate_tabs("list");
 
-	$form = new Form("index.php?module=config-announcement&amp;action=do_edit", "post");
+	$form = new Form("index.php?module=".MODULE."&amp;action=do_edit", "post");
 	$form_container = new FormContainer($lang->announcement);
 
 	$add_announcement = $form->generate_text_area("announcement", $announcement['Announcement']);
@@ -342,6 +362,9 @@ if($mybb->input['action'] == "do_add") {
 	$add_css = $form->generate_text_area("css", $announcement['Css']);
 	$form_container->output_row($lang->announcement_css, $lang->announcement_css_desc, $add_css);
 
+	$add_removable = $form->generate_yes_no_radio("removable", $announcement['removable']);
+	$form_container->output_row($lang->announcement_removable." <em>*</em>", $lang->announcement_removable_desc, $add_removable);
+
 	$add_enable = $form->generate_yes_no_radio("enable", $announcement['Enabled']);
 	$form_container->output_row($lang->announcement_enable." <em>*</em>", '', $add_enable);
 
@@ -372,14 +395,14 @@ if($mybb->input['action'] == "do_add") {
 		$db->update_query("announcement", array("Sort"=>$Sort), "ID='{$ID}'");
 	}
 	flash_message($lang->announcement_order_success, 'success');
-	admin_redirect("index.php?module=config-announcement");
+	admin_redirect("index.php?module=".MODULE);
 	
 /* Show a list of announcements */
 } else {
 	$page->output_header($lang->announcement);
 	generate_tabs("list");
 
-	$form = new Form("index.php?module=config-announcement&amp;action=order", "post");
+	$form = new Form("index.php?module=".MODULE."&amp;action=order", "post");
 	$form_container = new FormContainer("");
 
 	$form_container->output_row_header($lang->announcement_simple, array("colspan" => 2));
@@ -397,15 +420,15 @@ if($mybb->input['action'] == "do_add") {
 			} else {
 				$icon = "<img src=\"styles/{$page->style}/images/icons/bullet_off.gif\" alt=\"(Inactive)\" title=\"Inactive Announcement\" /> ";
 			}
-			$form_container->output_cell("<a href=\"index.php?module=config-announcement&amp;action=enable&amp;aid={$announcement['ID']}\">$icon</a>", array('width' => '2%'));
+			$form_container->output_cell("<a href=\"index.php?module=".MODULE."&amp;action=enable&amp;aid={$announcement['ID']}\">$icon</a>", array('width' => '2%'));
 			$form_container->output_cell($announcement['Announcement']);
 			$form_container->output_cell("<input type=\"text\" name=\"disporder[".$announcement['ID']."]\" value=\"".$announcement['Sort']."\" class=\"text_input align_center\" style=\"width: 80%; font-weight: bold;\" />", array('width' => '5%'));
 			if($announcement['Global'])
 				$form_container->output_cell($lang->yes, array('class' => 'align_center', 'width' => '5%'));
 			else
 				$form_container->output_cell($lang->no, array('class' => 'align_center', 'width' => '5%'));
-			$form_container->output_cell("<a href=\"index.php?module=config-announcement&amp;action=edit&amp;aid={$announcement['ID']}\">{$lang->edit}</a>", array('class' => 'align_center', 'width' => '10%'));
-			$form_container->output_cell("<a href=\"index.php?module=config-announcement&amp;action=delete&amp;aid={$announcement['ID']}\">{$lang->delete}</a>", array('class' => 'align_center', 'width' => '10%'));
+			$form_container->output_cell("<a href=\"index.php?module=".MODULE."&amp;action=edit&amp;aid={$announcement['ID']}\">{$lang->edit}</a>", array('class' => 'align_center', 'width' => '10%'));
+			$form_container->output_cell("<a href=\"index.php?module=".MODULE."&amp;action=delete&amp;aid={$announcement['ID']}\">{$lang->delete}</a>", array('class' => 'align_center', 'width' => '10%'));
 			$form_container->construct_row();
 		}
 	} else {
@@ -429,12 +452,12 @@ function generate_tabs($selected)
 	$sub_tabs = array();
 	$sub_tabs['list'] = array(
 		'title' => $lang->announcement_list,
-		'link' => "index.php?module=config-announcement&amp;action=list",
+		'link' => "index.php?module=".MODULE."&amp;action=list",
 		'description' => $lang->announcement_list_desc
 	);
 	$sub_tabs['add'] = array(
 		'title' => $lang->announcement_add,
-		'link' => "index.php?module=config-announcement&amp;action=add",
+		'link' => "index.php?module=".MODULE."&amp;action=add",
 		'description' => $lang->announcement_add_desc
 	);
 
