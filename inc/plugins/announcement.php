@@ -25,9 +25,9 @@ function announcement_info()
 	return array(
 		"name"			=> "Announcement",
 		"description"	=> "Manage your own Announcements",
-		"website"		=> "http://mybbdemo.tk/forum-9.html",
+		"website"		=> "http://jonesboard.tk/",
 		"author"		=> "Jones",
-		"authorsite"	=> "http://mybbdemo.tk/",
+		"authorsite"	=> "http://jonesboard.tk/",
 		"version"		=> "2.4",
 		"guid" 			=> "26ead0fc6a84d60992d8f5f9835b7148",
 		"compatibility" => "16*"
