@@ -187,7 +187,7 @@ function announcement_global()
 		if(!$mybb->input['id'] || $mybb->user['uid'] == 0)
 		    exit;
 		
-		$query = $db->simple_select("announcement", "removable, removedfrom", "ID=".intval($mybb->input['id']));
+		$query = $db->simple_select("announcement", "removable, removedfrom", "ID=".(int)$mybb->input['id']);
 		$ann = $db->fetch_array($query);
 		if(!$ann['removable'])
 		    exit;
@@ -202,7 +202,7 @@ function announcement_global()
 		$updated_user = array(
 			"removedfrom" => $db->escape_string(serialize($removedUser))
 		);
-		$db->update_query("announcement", $updated_user, "ID=".intval($mybb->input['id']));
+		$db->update_query("announcement", $updated_user, "ID=".(int)$mybb->input['id']);
 
 		if($mybb->input['ajax']) {
 			echo 1;
@@ -223,14 +223,14 @@ function announcement_index()
 function announcement_forumdisplay()
 {
 	global $fdannouncement, $mybb, $db;
-	$fid = intval($mybb->input['fid']);
+	$fid = (int)$mybb->input['fid'];
 	$fdannouncement = announcement_create(false, $fid);
 }
 
 function announcement_showthread()
 {
 	global $announcement, $mybb, $db;
-	$tid = intval($mybb->input['tid']);
+	$tid = (int)$mybb->input['tid'];
 	$announcement = announcement_create(false, -1, $tid);
 }
 

@@ -185,7 +185,7 @@ if($mybb->input['action'] == "do_add") {
 		flash_message($lang->announcement_error, 'error');
 		admin_redirect("index.php?module=".MODULE);
 	}
-	$aid=intval($mybb->input['aid']);
+	$aid=(int)$mybb->input['aid'];
 	$db->delete_query("announcement", "ID='{$aid}'");
 	flash_message($lang->announcement_delete_success, 'success');
 	admin_redirect("index.php?module=".MODULE);
@@ -197,7 +197,7 @@ if($mybb->input['action'] == "do_add") {
 		flash_message($lang->announcement_error, 'error');
 		admin_redirect("index.php?module=".MODULE);
 	}
-	$aid=intval($mybb->input['aid']);
+	$aid=(int)$mybb->input['aid'];
 	$query = $db->simple_select("announcement", "Enabled", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
@@ -223,7 +223,7 @@ if($mybb->input['action'] == "do_add") {
 		flash_message($lang->announcement_error, 'error');
 		admin_redirect("index.php?module=".MODULE);
 	}
-	$aid=intval($mybb->input['aid']);
+	$aid=(int)$mybb->input['aid'];
 	if(!verify_post_check($mybb->input['my_post_key']))
 	{
 		flash_message($lang->invalid_post_verify_key2, 'error');
@@ -304,7 +304,7 @@ if($mybb->input['action'] == "do_add") {
 		flash_message($lang->announcement_error, 'error');
 		admin_redirect("index.php?module=".MODULE);
 	}
-	$aid=intval($mybb->input['aid']);
+	$aid=(int)$mybb->input['aid'];
 	$query = $db->simple_select("announcement", "*", "ID='{$aid}'");
 	if($db->num_rows($query) != 1)
 	{
