@@ -9,8 +9,9 @@ if(!$pluginlist)
 $plugins->add_hook("global_start", "announcement_global");
 $plugins->add_hook("index_start", "announcement_index");
 $plugins->add_hook("forumdisplay_start", "announcement_forumdisplay");
+$plugins->add_hook("showthread_start", "announcement_showthread");
 
-if(in_array("myplugins", $pluginlist['active'])) {
+if(is_array($pluginlist['active']) && in_array("myplugins", $pluginlist['active'])) {
 	$plugins->add_hook("myplugins_actions", "announcement_myplugins_actions");
 	$plugins->add_hook("myplugins_permission", "announcement_admin_config_permissions");
 } else {
@@ -42,6 +43,7 @@ function announcement_install()
 		`Announcement` text NOT NULL,
 		`Global` tinyint(1) NOT NULL,
 		`Forum` text NOT NULL,
+		`tid` text NOT NULL default '',
 		`Groups` text NOT NULL,
 		`Langs` text NOT NULL,
 		`Color` varchar(20) NOT NULL,
@@ -74,6 +76,7 @@ function announcement_activate()
 	require MYBB_ROOT."inc/adminfunctions_templates.php";
 	find_replace_templatesets("index", "#".preg_quote('{$header}')."#i", '{$header}{$announcement}');
 	find_replace_templatesets("forumdisplay", "#".preg_quote('{$header}')."#i", '{$header}{$fdannouncement}');
+	find_replace_templatesets("showthread", "#".preg_quote('{$header}')."#i", '{$header}{$announcement}');
 	find_replace_templatesets("header", "#".preg_quote('{$pm_notice}')."#i", '{$announcement}{$pm_notice}');
 	find_replace_templatesets('headerinclude', "#".preg_quote('{$newpmmsg}')."#i", '<script type="text/javascript">
 function dismissANN(id)
@@ -100,6 +103,7 @@ function announcement_deactivate()
 	require MYBB_ROOT."inc/adminfunctions_templates.php";
 	find_replace_templatesets("index", "#".preg_quote('{$announcement}')."#i", "", 0);
 	find_replace_templatesets("forumdisplay", "#".preg_quote('{$fdannouncement}')."#i", "", 0);
+	find_replace_templatesets("showthread", "#".preg_quote('{$announcement}')."#i", "", 0);
 	find_replace_templatesets("header", "#".preg_quote('{$announcement}')."#i", "", 0);
 	find_replace_templatesets('headerinclude', "#".preg_quote('<script type="text/javascript">
 function dismissANN(id)
@@ -118,7 +122,7 @@ function dismissANN(id)
 	Element.remove("Ann_"+id);
 	return false;
 }
-</script>'."\n")."#i", '', 0);
+</script>'."\n")."#i", '');
 }
 
 function announcement_myplugins_actions($actions)
@@ -223,7 +227,14 @@ function announcement_forumdisplay()
 	$fdannouncement = announcement_create(false, $fid);
 }
 
-function announcement_create($global, $forum=-1)
+function announcement_showthread()
+{
+	global $announcement, $mybb, $db;
+	$tid = intval($mybb->input['tid']);
+	$announcement = announcement_create(false, -1, $tid);
+}
+
+function announcement_create($global, $forum=-1, $tid=-1)
 {
 	global $db, $mybb, $lang, $theme;
 	
@@ -239,14 +250,27 @@ function announcement_create($global, $forum=-1)
     	if(!announcement_member(@unserialize($announcements['Groups'])))
 			continue;
 
-		//Prüfen ob in einem Forum zum Zeigen (Globale werden immer übersprungen)
-		if(!announcement_forum(@unserialize($announcements['Forum']), $forum)&&!$global)
-		    continue;
-
 		//Prüfen ob Ankündigung in Sprache
 		if(!announcement_language(@unserialize($announcements['Langs'])))
 		    continue;
-		    
+
+		$in_forum = announcement_forum(@unserialize($announcements['Forum']), $forum);
+		$in_thread = announcement_thread($announcements['tid'], $tid);
+
+		//Prüfen ob in einem Forum oder Thema zum Zeigen (Globale werden immer übersprungen)
+		//Just do this * when it's not global
+		if(!$global) {
+			if($forum == -1 && $tid == -1) {
+				//We're on the index so test whether it's just showed here
+				$forums = @unserialize($announcements['Forum']);
+				if(($announcements['tid'] != 0 && $announcements['tid'] != "") || is_array($forums))
+				    continue;
+			} else {
+   				if(!$in_forum && !$in_thread)
+				    continue;
+			}
+		}	    
+
 		$removedUser = @unserialize($announcements['removedfrom']);
 		if($announcements['removable'] && $mybb->user['uid'] != 0) {
 			if($removedUser && in_array($mybb->user['uid'], $removedUser))
@@ -292,8 +316,22 @@ function announcement_create($global, $forum=-1)
 
 function announcement_forum($forums, $forum) {
 	if($forum==-1 && !is_array($forums))
-	    return true;
+  		return false;
     if(!@in_Array($forum, $forums))
+	    return false;
+	return true;
+}
+
+function announcement_thread($threads, $tid) {
+	if($threads != 0 && $threads != "") {
+		if(strpos($threads, ",") == -1)
+		    $threads = array($threads);
+		else
+			$threads = explode(",", trim($threads));
+	}
+    if($tid == -1 && !is_array($threads))
+		return false;
+    if(!is_array($threads) || !@in_Array($tid, $threads))
 	    return false;
 	return true;
 }

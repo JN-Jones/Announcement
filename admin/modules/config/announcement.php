@@ -71,6 +71,7 @@ if($mybb->input['action'] == "do_add") {
 		"Sort" => "0",
 		"Global" => $mybb->input['global'],
 		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
+		"tid" => $db->escape_string($mybb->input['thread']),
 		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
 		"Langs" => $db->escape_string(@serialize($mybb->input['langs'])),
 		"Color" => $db->escape_string($mybb->input['color']),
@@ -90,7 +91,7 @@ if($mybb->input['action'] == "do_add") {
 
 /* Show mask to add a new announcement */
 } elseif($mybb->input['action'] == "add") {
-	$page->add_breadcrumb_item($lang->announcement_add, "index.php?module=announcement-config&action=add");
+	$page->add_breadcrumb_item($lang->announcement_add, "index.php?module=".MODULE."&action=add");
 	$page->output_header($lang->announcement_add);
 	generate_tabs("add");
 	
@@ -106,6 +107,9 @@ if($mybb->input['action'] == "do_add") {
 
 	$add_forum = $form->generate_forum_select("forum[]", array(), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_forum, $lang->announcement_forum_desc, $add_forum, '', array(), array('id' => 'forum'));
+
+	$add_thread = $form->generate_text_box("thread");
+	$form_container->output_row($lang->announcement_thread, $lang->announcement_thread_desc, $add_thread, '', array(), array('id' => 'thread'));
 
 	$add_group = $form->generate_group_select("group[]", array(), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
@@ -168,6 +172,7 @@ if($mybb->input['action'] == "do_add") {
 		function loadPeekers()
 		{
 			new Peeker($$(".global"), $("forum"), /0/, true);
+			new Peeker($$(".global"), $("thread"), /0/, true);
 			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
 			new Peeker($("border"), $("border_color"), /[^0]/, false);
 		}
@@ -275,6 +280,7 @@ if($mybb->input['action'] == "do_add") {
 		"Announcement" => $db->escape_string($mybb->input['announcement']),
 		"Global" => $mybb->input['global'],
 		"Forum" => $db->escape_string(@serialize($mybb->input['forum'])),
+		"tid" => $db->escape_string($mybb->input['thread']),
 		"Groups" => $db->escape_string(@serialize($mybb->input['group'])),
 		"Langs" => $db->escape_string(@serialize($mybb->input['langs'])),
 		"Color" => $db->escape_string($mybb->input['color']),
@@ -307,7 +313,7 @@ if($mybb->input['action'] == "do_add") {
 	}
 	$announcement = $db->fetch_array($query);
 
-	$page->add_breadcrumb_item($lang->edit, "index.php?module=announcement-config&action=edit&aid=$aid");
+	$page->add_breadcrumb_item($lang->edit, "index.php?module=".MODULE."&amp;action=edit&amp;aid=$aid");
 	$page->output_header($lang->announcement);
 	generate_tabs("list");
 
@@ -323,6 +329,9 @@ if($mybb->input['action'] == "do_add") {
 
 	$add_forum = $form->generate_forum_select("forum[]", @unserialize($announcement['Forum']), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_forum, $lang->announcement_forum_desc, $add_forum, '', array(), array('id' => 'forum'));
+
+	$add_thread = $form->generate_text_box("thread", $announcement['tid']);
+	$form_container->output_row($lang->announcement_thread, $lang->announcement_thread_desc, $add_thread, '', array(), array('id' => 'thread'));
 
 	$add_group = $form->generate_group_select("group[]", @unserialize($announcement['Groups']), array("multiple"=>true));
 	$form_container->output_row($lang->announcement_group, $lang->announcement_group_desc, $add_group);
@@ -384,6 +393,7 @@ if($mybb->input['action'] == "do_add") {
 		function loadPeekers()
 		{
 			new Peeker($$(".global"), $("forum"), /0/, true);
+			new Peeker($$(".global"), $("thread"), /0/, true);
 			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
 			new Peeker($("border"), $("border_color"), /[^0]/, false);
 		}
@@ -432,7 +442,6 @@ if($mybb->input['action'] == "do_add") {
 			$form_container->construct_row();
 		}
 	} else {
-		echo "Keine";
 		$form_container->output_cell($lang->announcement_no, array('class' => 'align_center', 'colspan' => 6));
 		$form_container->construct_row();
 	}
