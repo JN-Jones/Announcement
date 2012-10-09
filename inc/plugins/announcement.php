@@ -37,6 +37,7 @@ function announcement_info()
 function announcement_install()
 {
 	global $db;
+	$col = $db->build_create_table_collation();
 	$db->query("CREATE TABLE `".TABLE_PREFIX."announcement` (
 		`ID` int(11) NOT NULL AUTO_INCREMENT,
 		`Sort` int(11) NOT NULL,
@@ -56,7 +57,7 @@ function announcement_install()
 		`removable` tinyint(1) NOT NULL,
 		`removedfrom` text NOT NULL default '',
 		`Enabled` tinyint(1) NOT NULL,
-		PRIMARY KEY (`ID`) ) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1");
+		PRIMARY KEY (`ID`) ) ENGINE=MyISAM {$col}");
 }
 
 function announcement_is_installed()
