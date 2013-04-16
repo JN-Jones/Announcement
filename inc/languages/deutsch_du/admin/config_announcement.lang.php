@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $l['announcement'] = "Ankündigungen";
 $l['order'] = "Sortierung";
 $l['announcement_simple'] = "Ankündigung";

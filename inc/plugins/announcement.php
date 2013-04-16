@@ -25,9 +25,9 @@ function announcement_info()
 	return array(
 		"name"			=> "Announcement",
 		"description"	=> "Manage your own Announcements",
-		"website"		=> "http://jonesboard.tk/",
+		"website"		=> "http://jonesboard.de/",
 		"author"		=> "Jones",
-		"authorsite"	=> "http://jonesboard.tk/",
+		"authorsite"	=> "http://jonesboard.de/",
 		"version"		=> "2.4",
 		"guid" 			=> "26ead0fc6a84d60992d8f5f9835b7148",
 		"compatibility" => "16*"
