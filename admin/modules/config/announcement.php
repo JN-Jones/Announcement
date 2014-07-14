@@ -167,16 +167,12 @@ if($mybb->input['action'] == "do_add") {
 
 	echo '<script type="text/javascript" src="./jscripts/peeker.js"></script>
 	<script type="text/javascript">
-		Event.observe(window, "load", function() {
-			loadPeekers();
+		$(document).ready(function() {
+			new Peeker($(".global"), $("#forum"), /0/, true);
+			new Peeker($(".global"), $("#thread"), /0/, true);
+			new Peeker($("#scroll"), $("#slow_down"), /[^none]/, false);
+			new Peeker($("#border"), $("#border_color"), /[^0]/, false);
 		});
-		function loadPeekers()
-		{
-			new Peeker($$(".global"), $("forum"), /0/, true);
-			new Peeker($$(".global"), $("thread"), /0/, true);
-			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
-			new Peeker($("border"), $("border_color"), /[^0]/, false);
-		}
 	</script>';
 
 /* Delete an announcement */
@@ -388,16 +384,12 @@ if($mybb->input['action'] == "do_add") {
 
 	echo '<script type="text/javascript" src="./jscripts/peeker.js"></script>
 	<script type="text/javascript">
-		Event.observe(window, "load", function() {
-			loadPeekers();
+		$(document).ready(function() {
+			new Peeker($(".global"), $("#forum"), /0/, true);
+			new Peeker($(".global"), $("#thread"), /0/, true);
+			new Peeker($("#scroll"), $("#slow_down"), /[^none]/, false);
+			new Peeker($("#border"), $("#border_color"), /[^0]/, false);
 		});
-		function loadPeekers()
-		{
-			new Peeker($$(".global"), $("forum"), /0/, true);
-			new Peeker($$(".global"), $("thread"), /0/, true);
-			new Peeker($("scroll"), $("slow_down"), /[^none]/, false);
-			new Peeker($("border"), $("border_color"), /[^0]/, false);
-		}
 	</script>';
 
 /* Save new Order */
