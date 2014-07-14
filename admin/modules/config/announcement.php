@@ -6,9 +6,9 @@ if(!defined("IN_MYBB"))
 }
 
 if(function_exists("myplugins_info"))
-    define(MODULE, "myplugins-announcement");
+	define(MODULE, "myplugins-announcement");
 else
-    define(MODULE, "config-announcement");
+	define(MODULE, "config-announcement");
 
 $page->add_breadcrumb_item($lang->announcement, "index.php?module=".MODULE);
 
@@ -20,7 +20,7 @@ if($mybb->input['action'] == "do_add") {
 		admin_redirect("index.php?module=".MODULE."&action=add");
 	}
 
-    if(!strlen(trim($mybb->input['announcement'])))
+	if(!strlen(trim($mybb->input['announcement'])))
 	{
 		flash_message($lang->announcement_not, 'error');
 		admin_redirect("index.php?module=".MODULE."&action=add");
@@ -82,7 +82,8 @@ if($mybb->input['action'] == "do_add") {
 		"slow_down" => $mybb->input['slow_down'],
 		"Css" => $db->escape_string($mybb->input['css']),
 		"removable" => $mybb->input['removable'],
-		"Enabled" => $mybb->input['enable']
+		"Enabled" => $mybb->input['enable'],
+		"removedfrom" => ""
 	);
 	$db->insert_query("announcement", $insert);
 
@@ -206,11 +207,11 @@ if($mybb->input['action'] == "do_add") {
 	}
 	$announcement = $db->fetch_array($query);
 	if($announcement['Enabled']) {
-	    $enabled=false;
-	    $lang->announcement_enable_success=$lang->sprintf($lang->announcement_enable_success, $lang->announcement_deactivate);
+		$enabled = 0;
+		$lang->announcement_enable_success=$lang->sprintf($lang->announcement_enable_success, $lang->announcement_deactivate);
 	} else {
-		$enabled=true;
-	    $lang->announcement_enable_success=$lang->sprintf($lang->announcement_enable_success, $lang->announcement_activate);
+		$enabled = 1;
+		$lang->announcement_enable_success=$lang->sprintf($lang->announcement_enable_success, $lang->announcement_activate);
 	}
 	$db->update_query("announcement", array("Enabled"=>$enabled), "ID='{$aid}'");
 	flash_message($lang->announcement_enable_success, 'success');
@@ -230,7 +231,7 @@ if($mybb->input['action'] == "do_add") {
 		admin_redirect("index.php?module=".MODULE."&action=edit&aid=$aid");
 	}
 
-    if(!strlen(trim($mybb->input['announcement'])))
+	if(!strlen(trim($mybb->input['announcement'])))
 	{
 		flash_message($lang->announcement_not, 'error');
 		admin_redirect("index.php?module=".MODULE);
@@ -413,7 +414,7 @@ if($mybb->input['action'] == "do_add") {
 	generate_tabs("list");
 
 	$form = new Form("index.php?module=".MODULE."&amp;action=order", "post");
-	$form_container = new FormContainer("");
+	$form_container = new FormContainer($lang->announcement);
 
 	$form_container->output_row_header($lang->announcement_simple, array("colspan" => 2));
 	$form_container->output_row_header($lang->order, array('class' => 'align_center'));
@@ -426,9 +427,9 @@ if($mybb->input['action'] == "do_add") {
 		while($announcement = $db->fetch_array($query))
 		{
 			if($announcement['Enabled']) {
-				$icon = "<img src=\"styles/{$page->style}/images/icons/bullet_on.gif\" alt=\"(Active)\" title=\"Active Announcement\" /> ";
+				$icon = "<img src=\"styles/{$page->style}/images/icons/bullet_on.png\" alt=\"(Active)\" title=\"Active Announcement\" /> ";
 			} else {
-				$icon = "<img src=\"styles/{$page->style}/images/icons/bullet_off.gif\" alt=\"(Inactive)\" title=\"Inactive Announcement\" /> ";
+				$icon = "<img src=\"styles/{$page->style}/images/icons/bullet_off.png\" alt=\"(Inactive)\" title=\"Inactive Announcement\" /> ";
 			}
 			$form_container->output_cell("<a href=\"index.php?module=".MODULE."&amp;action=enable&amp;aid={$announcement['ID']}\">$icon</a>", array('width' => '2%'));
 			$form_container->output_cell($announcement['Announcement']);

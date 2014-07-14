@@ -4,7 +4,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 if(!$pluginlist)
-    $pluginlist = $cache->read("plugins");
+	$pluginlist = $cache->read("plugins");
 
 $plugins->add_hook("global_start", "announcement_global");
 $plugins->add_hook("index_start", "announcement_index");
@@ -28,9 +28,9 @@ function announcement_info()
 		"website"		=> "http://jonesboard.de/",
 		"author"		=> "Jones",
 		"authorsite"	=> "http://jonesboard.de/",
-		"version"		=> "2.4",
+		"version"		=> "2.4.1",
 		"guid" 			=> "26ead0fc6a84d60992d8f5f9835b7148",
-		"compatibility" => "16*"
+		"compatibility" => "17*,18*"
 	);
 }
 
@@ -44,7 +44,7 @@ function announcement_install()
 		`Announcement` text NOT NULL,
 		`Global` tinyint(1) NOT NULL,
 		`Forum` text NOT NULL,
-		`tid` text NOT NULL default '',
+		`tid` text NOT NULL,
 		`Groups` text NOT NULL,
 		`Langs` text NOT NULL,
 		`Color` varchar(20) NOT NULL,
@@ -55,7 +55,7 @@ function announcement_install()
 		`slow_down` tinyint(1) NOT NULL,
 		`Css` text NOT NULL,
 		`removable` tinyint(1) NOT NULL,
-		`removedfrom` text NOT NULL default '',
+		`removedfrom` text NOT NULL,
 		`Enabled` tinyint(1) NOT NULL,
 		PRIMARY KEY (`ID`) ) ENGINE=MyISAM {$col}");
 }
@@ -79,7 +79,8 @@ function announcement_activate()
 	find_replace_templatesets("forumdisplay", "#".preg_quote('{$header}')."#i", '{$header}{$fdannouncement}');
 	find_replace_templatesets("showthread", "#".preg_quote('{$header}')."#i", '{$header}{$announcement}');
 	find_replace_templatesets("header", "#".preg_quote('{$pm_notice}')."#i", '{$announcement}{$pm_notice}');
-	find_replace_templatesets('headerinclude', "#".preg_quote('{$newpmmsg}')."#i", '<script type="text/javascript">
+	find_replace_templatesets('headerinclude', "#".preg_quote('var MyBBEditor = null;')."#i", 'var MyBBEditor = null;
+
 function dismissANN(id)
 {
 	if(!$("Ann_"+id))
@@ -95,8 +96,7 @@ function dismissANN(id)
 	new Ajax.Request("index.php?action=ann_dismiss", {method: "post", postBody: "ajax=1&my_post_key="+my_post_key+"&id="+id});
 	Element.remove("Ann_"+id);
 	return false;
-}
-</script>'."\n".'{$newpmmsg}');
+}');
 }
 
 function announcement_deactivate()
@@ -106,8 +106,7 @@ function announcement_deactivate()
 	find_replace_templatesets("forumdisplay", "#".preg_quote('{$fdannouncement}')."#i", "", 0);
 	find_replace_templatesets("showthread", "#".preg_quote('{$announcement}')."#i", "", 0);
 	find_replace_templatesets("header", "#".preg_quote('{$announcement}')."#i", "", 0);
-	find_replace_templatesets('headerinclude', "#".preg_quote('<script type="text/javascript">
-function dismissANN(id)
+	find_replace_templatesets('headerinclude', "#".preg_quote('function dismissANN(id)
 {
 	if(!$("Ann_"+id))
 	{
@@ -122,8 +121,7 @@ function dismissANN(id)
 	new Ajax.Request("index.php?action=ann_dismiss", {method: "post", postBody: "ajax=1&my_post_key="+my_post_key+"&id="+id});
 	Element.remove("Ann_"+id);
 	return false;
-}
-</script>'."\n")."#i", '');
+}')."#i", '');
 }
 
 function announcement_myplugins_actions($actions)
@@ -186,12 +184,12 @@ function announcement_global()
 	
 	if($mybb->input['action'] == "ann_dismiss") {
 		if(!$mybb->input['id'] || $mybb->user['uid'] == 0)
-		    exit;
+			exit;
 		
 		$query = $db->simple_select("announcement", "removable, removedfrom", "ID=".(int)$mybb->input['id']);
 		$ann = $db->fetch_array($query);
 		if(!$ann['removable'])
-		    exit;
+			exit;
 		$removedUser = @unserialize($ann['removedfrom']);
 		
 		if($removedUser && in_array($mybb->user['uid'], $removedUser))
@@ -247,37 +245,37 @@ function announcement_create($global, $forum=-1, $tid=-1)
 	$return="";
 	$query=$db->simple_select("announcement", "*", "Global='$global' AND Enabled='1'", array("order_by"=>"Sort"));
 	while($announcements=$db->fetch_array($query)) {
-		//Prüfen ob Mitglied einer Gruppe zum Zeigen
-    	if(!announcement_member(@unserialize($announcements['Groups'])))
+		//PrÃ¼fen ob Mitglied einer Gruppe zum Zeigen
+		if(!announcement_member(@unserialize($announcements['Groups'])))
 			continue;
 
-		//Prüfen ob Ankündigung in Sprache
+		//PrÃ¼fen ob AnkÃ¼ndigung in Sprache
 		if(!announcement_language(@unserialize($announcements['Langs'])))
-		    continue;
+			continue;
 
 		$in_forum = announcement_forum(@unserialize($announcements['Forum']), $forum);
 		$in_thread = announcement_thread($announcements['tid'], $tid);
 
-		//Prüfen ob in einem Forum oder Thema zum Zeigen (Globale werden immer übersprungen)
+		//PrÃ¼fen ob in einem Forum oder Thema zum Zeigen (Globale werden immer Ã¼bersprungen)
 		//Just do this * when it's not global
 		if(!$global) {
 			if($forum == -1 && $tid == -1) {
 				//We're on the index so test whether it's just showed here
 				$forums = @unserialize($announcements['Forum']);
 				if(($announcements['tid'] != 0 && $announcements['tid'] != "") || is_array($forums))
-				    continue;
+					continue;
 			} else {
-   				if(!$in_forum && !$in_thread)
-				    continue;
+				if(!$in_forum && !$in_thread)
+					continue;
 			}
-		}	    
+		}
 
 		$removedUser = @unserialize($announcements['removedfrom']);
 		if($announcements['removable'] && $mybb->user['uid'] != 0) {
 			if($removedUser && in_array($mybb->user['uid'], $removedUser))
 				continue;
 			else
-				$remove = "<div class=\"float_right\"><a href=\"index.php?action=ann_dismiss&amp;my_post_key={$mybb->post_code}&amp;id={$announcements['ID']}\" title=\"{$lang->dismiss_notice}\" onclick=\"return dismissANN('{$announcements['ID']}')\"><img src=\"{$theme['imgdir']}/dismiss_notice.gif\" alt=\"{$lang->dismiss_notice}\" title=\"[x]\" /></a></div>";
+				$remove = "<div class=\"float_right\"><a href=\"index.php?action=ann_dismiss&amp;my_post_key={$mybb->post_code}&amp;id={$announcements['ID']}\" title=\"{$lang->dismiss_notice}\" onclick=\"return dismissANN('{$announcements['ID']}')\"><img src=\"{$theme['imgdir']}/dismiss_notice.png\" alt=\"{$lang->dismiss_notice}\" title=\"[x]\" /></a></div>";
 		} else
 			$remove = "";
 
@@ -285,27 +283,27 @@ function announcement_create($global, $forum=-1, $tid=-1)
 		
 		$scrollamount = "scrollamount=\"4\"";
 		$scroll_additional = "";
-    	if($announcements['slow_down']) {
+		if($announcements['slow_down']) {
 			$scroll_additional = "onmouseover=\"this.setAttribute('scrollamount', '1', false)\" onmouseout=\"this.setAttribute('scrollamount', '4', false)\"";
 		}
-    	if($announcements['Scroll']=="right")
-		    $text = "<marquee direction=\"right\" $scrollamount $scroll_additional>$text</marquee>";
+		if($announcements['Scroll']=="right")
+			$text = "<marquee direction=\"right\" $scrollamount $scroll_additional>$text</marquee>";
 		elseif($announcements['Scroll']=="left")
-		    $text = "<marquee direction=\"left\" $scrollamount $scroll_additional>$text</marquee>";
+			$text = "<marquee direction=\"left\" $scrollamount $scroll_additional>$text</marquee>";
 		elseif($announcements['Scroll']=="both")
-		    $text = "<marquee behavior=\"alternate\" $scrollamount $scroll_additional>$text</marquee>";
+		 	$text = "<marquee behavior=\"alternate\" $scrollamount $scroll_additional>$text</marquee>";
 
 		$borderr = @unserialize($announcements['Border']);
 		$border = "";
 		if(is_array($borderr)) {
-	   		if(in_Array("left", $borderr))
-			    $border .= "border-left: 2px solid ".$announcements['BorderColor'].";";
+			if(in_Array("left", $borderr))
+				$border .= "border-left: 2px solid ".$announcements['BorderColor'].";";
 			if(in_Array("right", $borderr))
-			    $border .= "border-right: 2px solid ".$announcements['BorderColor'].";";
+				$border .= "border-right: 2px solid ".$announcements['BorderColor'].";";
 			if(in_Array("top", $borderr))
-			    $border .= "border-top: 2px solid ".$announcements['BorderColor'].";";
+				$border .= "border-top: 2px solid ".$announcements['BorderColor'].";";
 			if(in_Array("bottom", $borderr))
-			    $border .= "border-bottom: 2px solid ".$announcements['BorderColor'].";";
+				$border .= "border-bottom: 2px solid ".$announcements['BorderColor'].";";
 		}
 		$background = "background: ".$announcements['BackColor'].";";
 		$color = "color: ".$announcements['Color'].";";
@@ -317,50 +315,50 @@ function announcement_create($global, $forum=-1, $tid=-1)
 
 function announcement_forum($forums, $forum) {
 	if($forum==-1 && !is_array($forums))
-  		return false;
-    if(!@in_Array($forum, $forums))
-	    return false;
+		return false;
+	if(!@in_Array($forum, $forums))
+		return false;
 	return true;
 }
 
 function announcement_thread($threads, $tid) {
 	if($threads != 0 && $threads != "") {
 		if(strpos($threads, ",") == -1)
-		    $threads = array($threads);
+			$threads = array($threads);
 		else
 			$threads = explode(",", trim($threads));
 	}
-    if($tid == -1 && !is_array($threads))
+	if($tid == -1 && !is_array($threads))
 		return false;
-    if(!is_array($threads) || !@in_Array($tid, $threads))
-	    return false;
+	if(!is_array($threads) || !@in_Array($tid, $threads))
+		return false;
 	return true;
 }
 
 function announcement_language($languages) {
 	global $lang;
 	if(!is_array($languages))
-	    return true;
+		return true;
 	
 	$language = $lang->language;
 	
 	if(in_Array($language, $languages))
-	    return true;
+		return true;
 	return false;
 }
 
 function announcement_member($groups) {
 	global $mybb;
 	if(!is_array($groups))
-	    return true;
+		return true;
 	
 	$user = $mybb->user;
 
-    $memberships = explode(',', $user['additionalgroups']);
-    $memberships[] = $user['usergroup'];
+	$memberships = explode(',', $user['additionalgroups']);
+	$memberships[] = $user['usergroup'];
 
 	if(sizeof(array_intersect($groups, $memberships))>0)
-	    return true;
+		return true;
 	return false;
 }
 ?>
