@@ -11,6 +11,9 @@ $plugins->add_hook("index_start", "announcement_index");
 $plugins->add_hook("forumdisplay_start", "announcement_forumdisplay");
 $plugins->add_hook("showthread_start", "announcement_showthread");
 
+// Stupid hack to avoid throwing errors in modcp as $announcement is used there too but PHP doesn't like writing to an existing variable
+$plugins->add_hook("modcp_do_new_announcement_start", "announcement_modcp_hack");
+
 if(is_array($pluginlist['active']) && in_array("myplugins", $pluginlist['active'])) {
 	$plugins->add_hook("myplugins_actions", "announcement_myplugins_actions");
 	$plugins->add_hook("myplugins_permission", "announcement_admin_config_permissions");
@@ -175,6 +178,12 @@ function announcement_admin_config_permissions($admin_permissions)
 	$admin_permissions['announcement'] = $lang->announcement_permission;
 
 	return $admin_permissions;
+}
+
+function announcement_modcp_hack()
+{
+	global $announcement;
+	$announcement = array();
 }
 
 function announcement_global()
